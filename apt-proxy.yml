@@ -1,0 +1,10 @@
+---
+# This playbook deploys a squid proxy.
+
+# install suid proxy
+- hosts: apt-proxy
+  when: ansible_os_family == "Debian"
+  roles:
+    - apt-proxy
+  tags:
+    - apt-proxy

@@ -1,0 +1,32 @@
+---
+- name: Preparations for adding Kubernetes repo
+  apt: "name={{ item }} state=latest"
+  with_items:
+    - git
+    - htop
+    - apt-transport-https
+    #- mercurial
+    #- build-essential
+    #- nfs-kernel-server
+    #- docker.io
+    #- screen
+    - curl
+  become: true
+  
+- name: Adding Kubernetes repository
+  when: ansible_os_family == "Debian"
+  apt_repository:
+    filename: 'kubernetes'
+    state: present
+    repo: deb http://apt.kubernetes.io kubernetes-xenial main
+  register: kuberepo
+
+#- name: Use apt proxy
+#  when: ansible_os_family == "Debian" and apt_proxy != ""
+#  lineinfile:
+#    dest: "/etc/apt/apt.conf.d/98proxy"
+#    line: "proxy: {{ apt_proxy }}"
+#
+#- shell: "ls -1 /etc/apt/sources.list.d"
+#  when: ansible_os_family == "Debian" and apt_proxy != ""
+#  register: apt_repos
