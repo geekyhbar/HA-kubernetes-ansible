@@ -1,4 +1,8 @@
 # HA-kubernetes-ansible
+
+Forked version with an emphasis on Ubuntu Xenial (instead of CentOS)
+running in Vagrant libvirt (instead of VirtualBox) boxes.
+
 Ansible playbook to create a Highly Available kubernetes cluster using latest release 1.x on Bare metal system(CentOS-7.x).
 Ansible version "2.1.2" is require to use this playbook.
 
