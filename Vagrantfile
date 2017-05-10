@@ -3,10 +3,16 @@
 
 VAGRANTFILE_API_VERSION = "2"
 
+SSH_PUB_KEY = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
+
+$script = <<SCRIPT
+echo #{SSH_PUB_KEY} >> /home/$USER/.ssh/authorized_keys
+SCRIPT
+
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	config.vm.box = "nrclark/xenial64-minimal-libvirt"
 
-    config.vm.provider "libvirt" do |v|
+	config.vm.provider "libvirt" do |v|
 		# avoid domain name conflicts
 		v.random_hostname = true
 
@@ -39,13 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		config.ssh.forward_agent    = true
 		config.ssh.insert_key       = false
 		config.ssh.private_key_path =  ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
-		config.vm.provision :shell, privileged: false do |s|
-			ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
-			s.inline = <<-SHELL
-				echo #{ssh_pub_key} >> /home/$USER/.ssh/authorized_keys
-				#sudo bash -c "echo #{ssh_pub_key} >> /root/.ssh/authorized_keys"
-			SHELL
-		end
+		config.vm.provision :shell, :privileged => false, :inline => "$script"
 	end
 
 	config.vm.define "master2" do |node|
@@ -57,13 +57,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		config.ssh.forward_agent    = true
 		config.ssh.insert_key       = false
 		config.ssh.private_key_path =  ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
-		config.vm.provision :shell, privileged: false do |s|
-			ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
-			s.inline = <<-SHELL
-				echo #{ssh_pub_key} >> /home/$USER/.ssh/authorized_keys
-				#sudo bash -c "echo #{ssh_pub_key} >> /root/.ssh/authorized_keys"
-			SHELL
-		end
+		config.vm.provision :shell, :privileged => false, :inline => "$script"
 	end
 
 	config.vm.define "node1" do |node|
@@ -75,13 +69,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		config.ssh.forward_agent    = true
 		config.ssh.insert_key       = false
 		config.ssh.private_key_path =  ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
-		config.vm.provision :shell, privileged: false do |s|
-			ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
-			s.inline = <<-SHELL
-				echo #{ssh_pub_key} >> /home/$USER/.ssh/authorized_keys
-				#sudo bash -c "echo #{ssh_pub_key} >> /root/.ssh/authorized_keys"
-			SHELL
-		end
+		config.vm.provision :shell, :privileged => false, :inline => "$script"
 	end
 
 	config.vm.define "node2" do |node|
@@ -93,13 +81,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 		config.ssh.forward_agent    = true
 		config.ssh.insert_key       = false
 		config.ssh.private_key_path =  ["~/.vagrant.d/insecure_private_key","~/.ssh/id_rsa"]
-		config.vm.provision :shell, privileged: false do |s|
-			ssh_pub_key = File.readlines("#{Dir.home}/.ssh/id_rsa.pub").first.strip
-			s.inline = <<-SHELL
-				echo #{ssh_pub_key} >> /home/$USER/.ssh/authorized_keys
-				#sudo bash -c "echo #{ssh_pub_key} >> /root/.ssh/authorized_keys"
-			SHELL
-		end
+		config.vm.provision :shell, :privileged => false, :inline => "$script"
 	end
 
 	# see
@@ -125,4 +107,3 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	#	node.vm.provision :shell, inline: "cat ssh-key.pub >> .ssh/authorized_keys"
 	#end
 end
-
