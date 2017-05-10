@@ -10,6 +10,18 @@
     -  kubernetes-cni
   register: nodepackage
 
+- name: Install Kubernetes Node packages
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "{{ item }}"
+    state: latest
+    allow_unauthenticated: yes
+    update_cache: yes
+  with_items:
+    -  kubelet
+    -  kubernetes-cni
+  register: nodepackage
+
 - name: add kubelet service file
   copy: src=kubelet.service dest=/etc/systemd/system/kubelet.service owner=root group=root mode=0755
   register: kubelet

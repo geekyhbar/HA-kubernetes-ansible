@@ -1,11 +1,17 @@
 ---
 # This playbook deploys a kubernetes cluster with the default addons.
 
+#- hosts: all
+#  roles:
+#    - yum-repo
+#  tags:
+#    - yum-repo
+
 - hosts: all
   roles:
-    - yum-repo
+    - apt-repo
   tags:
-    - yum-repo
+    - apt-repo
 
 # install ssl cert
 - hosts: sslhost
@@ -21,10 +27,11 @@
   tags:
     - etcd
 
+# not really needed; flannel also exists as a k8s pod
 # Install flannel
-- hosts: all
-  roles:
-   - flannel
+#- hosts: all
+#  roles:
+#   - flannel
 
 # Install docker
 - hosts: all

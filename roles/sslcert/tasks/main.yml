@@ -14,13 +14,26 @@
 - stat: path={{ master_cert_dir }}/ca-key.pem
   register: ca_key_stat
 
+# see
+# https://coreos.com/kubernetes/docs/latest/openssl.html
+# for details
+# openssl cmds:
+# a) CA (see -subj '/CN=kube-ca') => cmd #1 and 2
+# a1) create key
+# a2) create CA cert/CSR
+# b) kube-admin (see -subj '/CN=kube-admin') => cmds #3,4,5
+# b1) create key ("openssl genrsa")
+# b2) create CSR (Certificate Signing Request; "openssl req")
+# b3) create (self signed) certificate ("openssl x509")
+# c) apiserver (see -subj '/CN=kube-apiserver') => cmds #6,7,8
+# c1-3) analogous to b1-3)
 - name: create kubenetes certificates
   when: not ca_key_stat.stat.exists
   register: create_cert
   command: "{{ item }}"
   with_items:
     - "openssl genrsa -out {{ master_cert_dir }}/ca-key.pem 2048"
-    - "openssl req -x509 -new -nodes -key {{ master_cert_dir }}/ca-key.pem -days 1000 -out {{ master_cert_dir }}/ca.pem -subj '/CN=kube-ca'"
+    - "openssl req -x509 -new -nodes -key {{ master_cert_dir }}/ca-key.pem -days 10000 -out {{ master_cert_dir }}/ca.pem -subj '/CN=kube-ca'"
     - "openssl genrsa -out {{ master_cert_dir }}/admin-key.pem 2048"
     - "openssl req -new -key {{ master_cert_dir }}/admin-key.pem -out {{ master_cert_dir }}/admin.csr -subj '/CN=kube-admin'"
     - "openssl x509 -req -in {{ master_cert_dir }}/admin.csr -CA {{ master_cert_dir }}/ca.pem -CAkey {{ master_cert_dir }}/ca-key.pem -CAcreateserial -out {{ master_cert_dir }}/admin.pem -days 1000"
@@ -35,5 +48,5 @@
   with_items:
     - "openssl genrsa -out {{ master_cert_dir }}/etcd-key.pem 2048"
     - "openssl req -new -key {{ master_cert_dir }}/etcd-key.pem -out {{ master_cert_dir }}/etcd.csr -subj '/CN=Etcd-server' -config {{ master_cert_dir }}/openssl-etcd.conf"
-    - "openssl x509 -req -in {{ master_cert_dir }}/etcd.csr -CA {{ master_cert_dir }}/ca.pem -CAkey {{ master_cert_dir }}/ca-key.pem -CAcreateserial -out {{ master_cert_dir }}/etcd.pem -days 1000 -extensions v3_req -extfile {{ master_cert_dir }}/openssl-etcd.conf"
+    - "openssl x509 -req -in {{ master_cert_dir }}/etcd.csr -CA {{ master_cert_dir }}/ca.pem -CAkey {{ master_cert_dir }}/ca-key.pem -CAcreateserial -out {{ master_cert_dir }}/etcd.pem -days 10000 -extensions v3_req -extfile {{ master_cert_dir }}/openssl-etcd.conf"
 

@@ -1,5 +1,7 @@
+# !!! You HAVE to use IP addresses here, otherwise openssl commands will fail !!!
 [etcd]
 192.168.50.11
+192.168.50.12
 [masters]
 192.168.50.11
 192.168.50.12

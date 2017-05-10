@@ -5,6 +5,21 @@
     name: etcd
     state: latest
 
+#- name: Install etcd
+#  when: ansible_os_family == "Debian"
+#  apt:
+#    name: etcd
+#    state: latest
+
+
+- name: Install etcd
+  when: ansible_os_family != "RedHat"
+  unarchive:
+    src: "https://github.com/coreos/etcd/releases/download/v3.1.7/etcd-v3.1.7-linux-amd64.tar.gz"
+    dest: "/opt"
+    remote_src: True
+  become: true
+
 - name: Create etcd config directory
   file: path={{ etcd_conf_dir }} state=directory
 
@@ -14,18 +29,22 @@
 
 - name: Write etcd config file
   template: src=etcd.conf.j2 dest=/etc/etcd/etcd.conf
-  register: etc_config
+  register: etcd_config
 
 - name: copy etcd certificate from ansible host 
   when: etcd_peer_url_scheme == 'https'
   copy: src={{ master_cert_dir }} dest={{ kube_config_dir }}
   register: etcd_cert
 
+- name: copy etcd service file
+  copy: src=etcd.service dest=/etc/systemd/system
+  register: etcd_service
+
 - name: Enable and start etcd
-  when: etc_config|succeeded
+  when: etcd_config|succeeded and etcd_service|succeeded
   service: name=etcd enabled=no state=started
 
 - name: Retart etcd
   service: name=etcd state=restarted
-  when: etc_config|changed and etcd_cert|changed
+  when: etcd_config|changed and etcd_cert|changed
   register: etcd_started

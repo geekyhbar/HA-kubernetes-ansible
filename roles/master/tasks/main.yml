@@ -11,6 +11,19 @@
     -  kubernetes-cni
   register: masterpackage
 
+- name: Install Kubernetes packages
+  when: ansible_os_family == "Debian"
+  apt:
+    name: "{{ item }}"
+    state: latest
+    allow_unauthenticated: yes
+    update_cache: yes
+  with_items:
+    -  kubectl
+    -  kubelet
+    -  kubernetes-cni
+  register: masterpackage
+
 - name: create kubernetes config directory
   file: path={{ manifest_config_dir }} state=directory
   register: manifest

@@ -5,13 +5,38 @@
     name: docker
     state: latest
 
+- name: Install Docker Xenial repository
+  when: ansible_os_family == "Debian"
+  apt_repository:
+    filename: 'docker-engine'
+    state: present
+    repo: deb [arch=amd64] https://apt.dockerproject.org/repo ubuntu-xenial main
+  register: dockerrepo
+
+# Releases > 1.12.x are buggy when used in conjunction with Kubernetes
+# => use the most current 1.12.x mentioned in repo Packages file
+- name: Install Docker
+  when: ansible_os_family == "Debian"
+  apt:
+    name: docker-engine=1.12.3-0~xenial
+    allow_unauthenticated: yes
+    state: present
+
 - name: Add any insecure registrys to docker config
   lineinfile: dest=/etc/sysconfig/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
-  when: insecure_registrys is defined and insecure_registrys > 0
+  when: insecure_registrys is defined and insecure_registrys != '' and ansible_os_family == "RedHat"
+
+- name: Add any insecure registrys to docker config
+  lineinfile: dest=/etc/defaults/docker regexp=^INSECURE_REGISTRY= line=INSECURE_REGISTRY="{% for reg in insecure_registrys %}--insecure-registry={{ reg }} {% endfor %}"
+  when: insecure_registrys is defined and insecure_registrys != '' and ansible_os_family == "Debian"
 
 - name: add registry
   lineinfile: dest=/etc/sysconfig/docker regexp=^ADD_REGISTRY= line=ADD_REGISTRY="{% for reg in add_registry %}--add-registry={{ reg }} {%endfor %}"
-  when: add_registry is defined and add_registry > 0
+  when: add_registry is defined and add_registry != '' and ansible_os_family == "RedHat"
+
+- name: add registry
+  lineinfile: dest=/etc/defaults/docker regexp=^ADD_REGISTRY= line=ADD_REGISTRY="{% for reg in add_registry %}--add-registry={{ reg }} {%endfor %}"
+  when: add_registry is defined and add_registry != '' and ansible_os_family == "Debian"
 
 - name: Enable Docker
   service: name=docker enabled=no state=started

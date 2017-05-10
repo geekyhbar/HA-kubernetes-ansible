@@ -3,6 +3,7 @@
 
 # install suid proxy
 - hosts: yum-proxy
+  when: ansible_os_family == "RedHat"
   roles:
     - yum-proxy
   tags:
