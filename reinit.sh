@@ -13,6 +13,7 @@ vagrant halt node2 && vagrant destroy node2 && \
 vagrant plugin install vagrant-libvirt && \
 vagrant up && \
 cp ~/.ssh/config ~/.ssh/config.orig && \
+cp ~/.ssh/id_rsa.pub ssh-key.pub && \
 for a in master1 master2 node1 node2; do vagrant ssh-config ${a} >> ~/.ssh/config; done && \
 for a in master1 master2 node1 node2; do ssh ${a} exit; done && \
 #for a in 11 12 21 22; do ssh 192.168.50.${a} exit; done && \
